@@ -132,9 +132,12 @@
         const dates = data.items.map((item) => {
           if (item.summary === "お振替可能") {
             const option = document.createElement("option");
-            option.text = new Date(item.start.dateTime)
+            const date = new Date(item.start.dateTime)
+            const dayOfWeek = [ "日", "月", "火", "水", "木", "金", "土" ][date.getDay()]
+            option.text = date
               .toLocaleString()
-              .slice(0, -3);
+              .slice(0, -3)
+              .split(' ').join(`(${dayOfWeek}) `);
             newDateSelector.appendChild(option);
           }
         });
