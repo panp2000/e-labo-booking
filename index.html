@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja-JP" data-theme="bumblebee">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@2.43.0/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <title>E-Labo 予約変更システム</title>
+  </head>
+  <body>
+    <header>
+      <div class="navbar bg-base-100">
+        <div class="flex-none">
+          <button class="btn btn-square btn-ghost">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="inline-block w-5 h-5 stroke-current"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+        </div>
+        <div class="flex-1">
+          <a class="btn btn-ghost normal-case text-xl">E-Labo 予約変更</a>
+        </div>
+        <div class="flex-none">
+          <button class="btn btn-square btn-ghost">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="inline-block w-5 h-5 stroke-current"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="container">
+        <form onsubmit="sendmail(event)" method="post" id="form">
+          <!-- 名前入力 -->
+          <div class="form-control w-full max-w-xs">
+            <label class="label">
+              <span class="label-text">名前</span>
+            </label>
+            <input
+              name="name"
+              id="name"
+              type="text"
+              placeholder="名前"
+              class="input input-bordered w-full max-w-xs"
+              required
+            />
+          </div>
+
+          <!-- 休み希望日入力 -->
+          <div class="form-control w-full max-w-xs">
+            <label for="date" class="label">お休み希望日</label>
+            <input id="date" type="date" name="oldDate" />
+          </div>
+
+          <!-- 振替希望日 -->
+          <div class="form-control w-full max-w-xs">
+            <label class="label">
+              <span class="label-text">お振替希望日</span>
+            </label>
+            <select class="select select-bordered" id="newDate" name="newDate">
+              <option disabled selected>以下から選択</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">送信</button>
+        </form>
+      </div>
+    </main>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"
+    ></script>
+    <script type="text/javascript">
+      const CALENDAR_ID =
+        "14b5pbdqhrq1871eialhqrscv0@group.calendar.google.com";
+      const API_KEY = "AIzaSyByM9kYD63gdd_lH8mBGHC8f_my2dmsXnw";
+      const DISCOVERY_DOC =
+        "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+      const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+      const START_DATE = new Date();
+      const END_DATE = new Date();
+      END_DATE.setMonth(END_DATE.getMonth() + 2);
+      END_DATE.setDate(
+        new Date(END_DATE.getFullYear(), END_DATE.getMonth(), 0).getDate()
+      );
+
+      const URL =
+        "https://www.googleapis.com/calendar/v3/calendars/" +
+        CALENDAR_ID +
+        "/events?";
+      const query_params = new URLSearchParams({
+        key: API_KEY,
+        timeMin: START_DATE.toISOString(),
+        timeMax: END_DATE.toISOString(),
+        maxResults: 300,
+        orderBy: "startTime",
+        singleEvents: "true",
+      });
+
+      fetch(URL + query_params)
+        .then((response) => response.json())
+        .then((data) => formatJson(data));
+
+      const formatJson = (data) => {
+        const newDateSelector = document.getElementById("newDate");
+        const dates = data.items.map((item) => {
+          if (item.summary === "お振替可能") {
+            const option = document.createElement("option");
+            option.text = new Date(item.start.dateTime)
+              .toLocaleString()
+              .slice(0, -3);
+            newDateSelector.appendChild(option);
+          }
+        });
+      };
+      (function () {
+        emailjs.init("5ri7dpole0VnTGMLd");
+      })();
+      function sendmail(event) {
+        //
+        event.preventDefault();
+        const form = document.getElementById("form");
+        const name = form.name.value;
+        const oldDate = form.oldDate.value;
+        const newDate = form.newDate.value;
+
+        const message = `生徒名: ${name}
+お休み希望日： ${oldDate}
+振替希望日時： ${newDate}`;
+
+        var contactParams = {
+          message,
+        };
+
+        // send email
+        emailjs.send("service_0q4yr1d", "template_43p5rnh", contactParams).then(
+          function (res) {
+            console.log("SUCCESS!", res.status, res.text);
+            alert("受け付けいたしました。");
+            location.href = "/";
+          },
+          function (error) {
+            console.log("FAILED...", error);
+            alert(
+              "エラーが発生しました、しばらくたってから再度お試しください。"
+            );
+          }
+        );
+      }
+    </script>
+  </body>
+</html>
