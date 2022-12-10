@@ -15,7 +15,9 @@
     <header>
       <div class="navbarbg-base-100">
         <div class="flex-1">
-          <a class="btn btn-ghost normal-case text-xl">イーラボ お振替希望フォーム</a>
+          <a class="btn btn-ghost normal-case text-xl"
+            >イーラボ お振替希望フォーム</a
+          >
         </div>
       </div>
     </header>
@@ -44,7 +46,7 @@
           </div>
 
           <!-- 振替希望日 -->
-          <div class="form-control w-full max-w-xs mb-10">
+          <div class="form-control w-full max-w-xs mb-5">
             <label class="label">
               <span class="label-text">お振替希望日</span>
             </label>
@@ -52,23 +54,35 @@
               <option disabled selected>以下から選択</option>
             </select>
           </div>
-          <button type="submit" class="btn btn-primary">送信</button>
+
+          <!-- reCaptcha -->
+          <div
+            id="recaptcha"
+            name="recaptcha"
+            class="g-recaptcha"
+            data-sitekey="6LeI42wjAAAAAHFfj5wAwcF1dmW8RPRkkJkDwmT4"
+          ></div>
+
+          <button type="submit" class="btn btn-primary mt-10">送信</button>
         </form>
       </div>
     </main>
+
+    <!-- tailwind css 読み込み -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- google API 読み込み -->
     <script src="https://apis.google.com/js/api.js"></script>
+    <!-- emailjs読み込み -->
     <script
       type="text/javascript"
       src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"
     ></script>
+    <!-- reCaptcha読み込み -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script type="text/javascript">
       const CALENDAR_ID =
         "14b5pbdqhrq1871eialhqrscv0@group.calendar.google.com";
       const API_KEY = "AIzaSyByM9kYD63gdd_lH8mBGHC8f_my2dmsXnw";
-      const DISCOVERY_DOC =
-        "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
-      const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
       const START_DATE = new Date();
       const END_DATE = new Date();
       END_DATE.setMonth(END_DATE.getMonth() + 3);
@@ -95,12 +109,15 @@
         const dates = data.items.map((item) => {
           if (item.summary === "お振替可能") {
             const option = document.createElement("option");
-            const date = new Date(item.start.dateTime)
-            const dayOfWeek = [ "日", "月", "火", "水", "木", "金", "土" ][date.getDay()]
+            const date = new Date(item.start.dateTime);
+            const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][
+              date.getDay()
+            ];
             option.text = date
               .toLocaleString()
               .slice(0, -3)
-              .split(' ').join(`(${dayOfWeek}) `);
+              .split(" ")
+              .join(`(${dayOfWeek}) `);
             newDateSelector.appendChild(option);
           }
         });
@@ -115,6 +132,9 @@
         const name = form.name.value;
         const oldDate = form.oldDate.value;
         const newDate = form.newDate.value;
+        const reCaptchaRes = document.getElementById(
+          "g-recaptcha-response"
+        ).value;
 
         const message = `生徒名: ${name}
 お休み希望日： ${oldDate}
@@ -122,6 +142,7 @@
 
         var contactParams = {
           message,
+          "g-recaptcha-response": reCaptchaRes,
         };
 
         // send email
