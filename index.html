@@ -105,10 +105,7 @@
       const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
       const START_DATE = new Date();
       const END_DATE = new Date();
-      END_DATE.setMonth(END_DATE.getMonth() + 2);
-      END_DATE.setDate(
-        new Date(END_DATE.getFullYear(), END_DATE.getMonth(), 0).getDate()
-      );
+      END_DATE.setMonth(END_DATE.getMonth() + 3);
 
       const URL =
         "https://www.googleapis.com/calendar/v3/calendars/" +
