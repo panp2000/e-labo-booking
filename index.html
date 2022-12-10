@@ -101,8 +101,14 @@
       });
 
       fetch(URL + query_params)
-        .then((response) => response.json())
-        .then((data) => formatJson(data));
+        .then(
+          (response) => response.json(),
+          (error) => alert("エラーが発生しました")
+        )
+        .then(
+          (data) => formatJson(data),
+          (error) => alert("エラーが発生しました")
+        );
 
       const formatJson = (data) => {
         const newDateSelector = document.getElementById("newDate");
