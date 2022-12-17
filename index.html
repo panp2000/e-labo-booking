@@ -12,7 +12,7 @@
     <title>イーラボ お振替希望フォーム</title>
   </head>
   <body>
-    <header>
+    <header class="container">
       <div class="navbarbg-base-100">
         <div class="flex-1">
           <a class="btn btn-ghost normal-case text-xl"
@@ -70,6 +70,20 @@
 
     <!-- tailwind css 読み込み -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          container: {
+            center: true,
+            padding: "1.25rem",
+            screens: {
+              xl: "1200px",
+              "2xl": "1200px",
+            },
+          },
+        },
+      };
+    </script>
     <!-- google API 読み込み -->
     <script src="https://apis.google.com/js/api.js"></script>
     <!-- emailjs読み込み -->
