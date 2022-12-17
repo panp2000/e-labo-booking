@@ -100,14 +100,28 @@
         singleEvents: "true",
       });
 
-      fetch(URL + query_params)
+      const controller = new AbortController();
+
+      fetch(URL + query_params, { signal: controller.signal })
         .then(
           (response) => response.json(),
-          (error) => alert("エラーが発生しました")
+          (error) => {
+            if (error.name == "AbortError") {
+              alert("予約可能日の読み込みが中断されました");
+            } else {
+              alert("エラーが発生しました");
+            }
+          }
         )
         .then(
           (data) => formatJson(data),
-          (error) => alert("エラーが発生しました")
+          (error) => {
+            if (error.name == "AbortError") {
+              alert("予約可能日の読み込みが中断されました");
+            } else {
+              alert("エラーが発生しました");
+            }
+          }
         );
 
       const formatJson = (data) => {
